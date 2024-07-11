@@ -9,6 +9,13 @@ import { generateToken } from '../utils/GenerateToken';
 import { PrismaClient, Role } from '@prisma/client';
 const prisma = new PrismaClient();
 
+type LoginUser = {
+    email: string;
+    password: string;
+    token: string;
+}
+
+
 const createUser = async (req: Request, res: Response) => {
     try {
         //@ts-ignore
@@ -72,8 +79,90 @@ const createUser = async (req: Request, res: Response) => {
     }
 };
 
+const loginUser = async(req: Request, res: Response) => {
+    const { email, password }: LoginUser = req.body;
 
+    if (!email || !password) {
+        return res.status(401).json(
+            new ApiError(
+                null,
+                "Credentials are required",
+                false
+            )
+        )
+    }
+
+    try {
+        const user = await prisma.user.findFirst({
+            where: {
+                email
+            }
+        })
+        if (!user) {
+            return res.status(401).json(
+                new ApiError(
+                    null,
+                    "Admin doesn't exits",
+                    false
+                )
+            )
+        }
+        
+        const isPassValid = await bcrypt.compare(password, user.password);
+        
+        if (!isPassValid) {
+            return res.status(401).json(
+                new ApiError(
+                    null,
+                    "Invalid user password",
+                    false
+                )
+            )
+        }
+        
+        const Token = await generateToken(user);
+        const existingUser = await prisma.user.findUnique({
+            where: {
+                id: user.id
+            }, select: {
+                id: true,
+                username: true,
+                email: true,
+                password: false,
+                role: false,
+                createdAt: false
+            }
+        })
+
+        const options = {
+            httpOnly: true,
+            secure: true
+        }
+        return res.status(200)
+                .cookie("accessToken", Token.accessToken, options)
+                .cookie("refreshToken", Token.accessToken, options)
+                .json(
+                    new ApiResponse(
+                        {
+                            userData: existingUser
+                        },
+                        `Welcome back ${existingUser?.username}`,
+                        true
+                    )
+                )
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            new ApiError(
+                null,
+                "Internal server error",
+                false
+            )
+        )
+    }
+}
 
 export {
     createUser,
+    loginUser
 }
