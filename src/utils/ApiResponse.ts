@@ -1,13 +1,12 @@
-class ApiResponse<T> extends Error{
+class ApiResponse<T>{
     public success: boolean;
     public data: T;
-    public message: string = "Something went wrong";
+    public message: string;
 
-    constructor(data: T, message: string){
-        super(message)
+    constructor(data: T, message: string, success: boolean){
         this.data = data;
         this.message = message;
-        this.success = true;
+        this.success = success;
     }
 }
 

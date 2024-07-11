@@ -4,11 +4,11 @@ class ApiError<T> extends Error{
     public data: T;
     public message: string = "Something went wrong";
 
-    constructor(data: T, message: string){
+    constructor(data: T, message: string, success: boolean){
         super(message)
         this.data = data;
         this.message = message;
-        this.success = true;
+        this.success = success;
     }
 }
 

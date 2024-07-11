@@ -1,25 +1,18 @@
 import { UserData } from './../utils/GenerateToken';
 import { adminSignupSchema, generateSixDigits } from './../schemas/signupAdminSchema';
 import { signupSchema } from './../schemas/signUpSchema';
-import { PrismaClient, Role } from '@prisma/client';
 import router, { Request, Response } from 'express';
 import bcrypt from "bcrypt";
 import { ApiResponse } from '../utils/ApiResponse';
 import { ApiError } from '../utils/ApiError';
 import { generateToken } from '../utils/GenerateToken';
+import { PrismaClient, Role } from '@prisma/client';
 const prisma = new PrismaClient();
-
-type Admin = {
-    username: string;
-    password: string;
-    email: string;
-    token: string;
-}
 
 const createUser = async (req: Request, res: Response) => {
     try {
-        // @ts-ignore
-        const { username, password, email }: User = req.body as signupSchema;
+        //@ts-ignore
+        const { username, password, email } = req.body as signupSchema;
 
         if (!username || !password || !email) {
             return res.status(400).json({
@@ -63,7 +56,8 @@ const createUser = async (req: Request, res: Response) => {
                 {
                     userData: user, Token 
                 },
-                "User created Successfully"
+                "User created Successfully",
+                true
             )
         );
     } catch (error) {
@@ -71,7 +65,8 @@ const createUser = async (req: Request, res: Response) => {
         res.status(500).json(
             new ApiError(
                 null, 
-                "Internal server error"
+                "Internal server error",
+                false
             )
         );
     }
@@ -79,61 +74,6 @@ const createUser = async (req: Request, res: Response) => {
 
 
 
-const createAdmin = async(req: Request, res: Response) => {
-    const { username, password, email, token }: Admin = req.body;
-
-    if (!username.trim() || !password.trim() || !email.trim() || !token.trim()) {
-        return res.status(402).json(
-            new ApiError(
-                null,
-                "Credentials are required"
-            )
-        )
-    }
-
-    try {
-        const existingAdmin = await prisma.admin.findFirst({
-            where: {
-                email,
-            }
-        })
-        if(existingAdmin){
-            return res.status(401).json(
-                new ApiError(
-                    null,
-                    "User already logged in"
-                )
-            )
-        }
-        const hashedPassword = await bcrypt.hash(password, 10) as string;
-        const admin = await prisma.admin.create({
-            data: {
-                username,
-                email,
-                password: hashedPassword,
-                token: parseInt(token)
-            }
-        })
-        if (!admin) {
-            return res.status(401).json(
-                new ApiError(
-                    null,
-                    "Wrong credentials"
-                )
-            )
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json(
-            new ApiError(
-                null, 
-                "Internal server error"
-            )
-        );
-    }
-}
-
 export {
     createUser,
-    createAdmin
 }
