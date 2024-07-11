@@ -4,7 +4,9 @@ import { Request, Response } from 'express';
 import { ApiError } from '../utils/ApiError';
 import { ApiResponse } from '../utils/ApiResponse';
 import { generateSixDigits } from '../schemas/signupAdminSchema';
-import { generateToken } from '../utils/GenerateToken';
+import { generateToken, UserData } from '../utils/GenerateToken';
+import * as z  from "zod";
+import { adminSigninSchema } from '../schemas/signinAdminschema';
 const prisma = new PrismaClient();
 
 
@@ -12,6 +14,12 @@ type Admin = {
     username: string;
     password: string;
     email: string;
+    token: string;
+}
+
+type LoginAdmin = {
+    email: string;
+    password: string;
     token: string;
 }
 
@@ -60,19 +68,11 @@ const createAdmin = async(req: Request, res: Response) => {
                 )
             )
         }
-        const Token = await generateToken(admin);
-        const options = {
-            httpOnly: true,
-            secure: true
-        }
         return res.status(201)
-                .cookie("accessToken", Token.accessToken, options)
-                .cookie("refreshToken", Token.accessToken, options)
-                .cookie("adminToken", Token.accessToken, options)
                 .json(
                     new ApiResponse(
                         {
-                            data: admin, Token
+                            data: admin
                         },
                         "Ädmin created sucessfully",
                         true
@@ -90,6 +90,91 @@ const createAdmin = async(req: Request, res: Response) => {
     }
 }
 
+const loginAdmin = async(req: Request, res: Response) => {
+    const { email, password, token }: LoginAdmin = req.body;
+
+    if (!email || !password || !token) {
+        return res.status(401).json(
+            new ApiError(
+                null,
+                "Credentials are required",
+                false
+            )
+        )
+    }
+
+    try {
+        const admin = await prisma.admin.findFirst({
+            where: {
+                token: parseInt(token)
+            }
+        })
+        if (!admin) {
+            return res.status(401).json(
+                new ApiError(
+                    null,
+                    "Admin doesn't exits",
+                    false
+                )
+            )
+        }
+        
+        const isPassValid = await bcrypt.compare(password, admin.password);
+        
+        if (!isPassValid) {
+            return res.status(401).json(
+                new ApiError(
+                    null,
+                    "Invalid user password",
+                    false
+                )
+            )
+        }
+        
+        const Token = await generateToken(admin);
+        const user = await prisma.admin.findUnique({
+            where: {
+                id: admin.id
+            }, select: {
+                id: true,
+                username: true,
+                email: true,
+                password: false,
+                role: false,
+                courses: false,
+                token: false,
+                createdAt: false
+            }
+        })
+
+        const options = {
+            httpOnly: true,
+            secure: true
+        }
+        return res.status(200)
+                .cookie("accessToken", Token.accessToken, options)
+                .cookie("refreshToken", Token.accessToken, options)
+                .cookie("adminToken", Token.accessToken, options)
+                .json(
+                    new ApiResponse(
+                        {
+                            AdminData: user
+                        },
+                        `Welcome back admin Mr.${user?.username}`,
+                        true
+                    )
+                )
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            new ApiError(
+                null,
+                "Internal server error",
+                false
+            )
+        )
+    }
+}
 const getAdminToken = async(req: Request, res: Response)=> {
     return res.status(201).json(
         new ApiResponse(
@@ -102,5 +187,6 @@ const getAdminToken = async(req: Request, res: Response)=> {
 
 export { 
     getAdminToken,
-    createAdmin
+    createAdmin,
+    loginAdmin
 }

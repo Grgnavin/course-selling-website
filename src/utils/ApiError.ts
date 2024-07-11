@@ -1,7 +1,7 @@
 
 class ApiError<T> extends Error{
     public success: boolean;
-    public data: T;
+    public data: T | null;
     public message: string = "Something went wrong";
 
     constructor(data: T, message: string, success: boolean){
