@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { usernameValidation } from "./signUpSchema";
 
-function generateSixDigits(): string {
+export function generateSixDigits(): string {
     return Math.floor(100000 + (Math.random() * 900000)).toString();
 }
 

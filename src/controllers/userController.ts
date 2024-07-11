@@ -1,8 +1,18 @@
+import { adminSignupSchema, generateSixDigits } from './../schemas/signupAdminSchema';
 import { signupSchema } from './../schemas/signUpSchema';
 import { PrismaClient } from '@prisma/client';
 import router, { Request, Response } from 'express';
 import bcrypt from "bcrypt";
+import { ApiResponse } from '../utils/ApiResponse';
+import { ApiError } from '../utils/ApiError';
 const prisma = new PrismaClient();
+
+type Admin = {
+    username: string;
+    password: string;
+    email: string;
+    token: string;
+}
 
 const createUser = async (req: Request, res: Response) => {
     try {
@@ -35,22 +45,80 @@ const createUser = async (req: Request, res: Response) => {
             }
         });
 
-        res.status(201).json({
-            user,
-            msg: "User created successfully"
-        });
+        res.status(201).json(
+            new ApiResponse(
+                user,
+                "User created Successfully"
+            )
+        );
     } catch (error) {
         console.error(error);
-        res.status(500).json({
-            msg: "Internal server error"
-        });
+        res.status(500).json(
+            new ApiError(
+                null, 
+                "Internal server error"
+            )
+        );
     }
 };
 
-// const createAdmin = async(req: Request, res: Response) => {
 
-// }
+
+const createAdmin = async(req: Request, res: Response) => {
+    const { username, password, email, token }: Admin = req.body;
+
+    if (!username.trim() || !password.trim() || !email.trim() || !token.trim()) {
+        return res.status(402).json(
+            new ApiError(
+                null,
+                "Credentials are required"
+            )
+        )
+    }
+
+    try {
+        const existingAdmin = await prisma.admin.findFirst({
+            where: {
+                email,
+            }
+        })
+        if(existingAdmin){
+            return res.status(401).json(
+                new ApiError(
+                    null,
+                    "User already logged in"
+                )
+            )
+        }
+        const hashedPassword = await bcrypt.hash(password, 10) as string;
+        const admin = await prisma.admin.create({
+            data: {
+                username,
+                email,
+                password: hashedPassword,
+                token: parseInt(token)
+            }
+        })
+        if (!admin) {
+            return res.status(401).json(
+                new ApiError(
+                    null,
+                    "Wrong credentials"
+                )
+            )
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json(
+            new ApiError(
+                null, 
+                "Internal server error"
+            )
+        );
+    }
+}
 
 export {
-    createUser
+    createUser,
+    createAdmin
 }

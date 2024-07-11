@@ -21,12 +21,13 @@ model User {
 
 model Admin {
   id          Int @id @default(autoincrement())
-  createdAt   DateTime @default(now())
+  username    String
   email       String @unique @db.VarChar(100)
   password    String  @db.VarChar(25)
   role        Role @default(ADMIN)
   courses     Course[]
   token       Int
+  createdAt   DateTime @default(now())
 }
 
 model Course{

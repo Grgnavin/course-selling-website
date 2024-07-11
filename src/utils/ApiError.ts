@@ -1,5 +1,5 @@
 
-class ApiEror<T> extends Error{
+class ApiError<T> extends Error{
     public success: boolean;
     public data: T;
     public message: string = "Something went wrong";
@@ -12,4 +12,4 @@ class ApiEror<T> extends Error{
     }
 }
 
-export { ApiEror }
+export { ApiError }
