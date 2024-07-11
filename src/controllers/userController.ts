@@ -1,10 +1,12 @@
+import { UserData } from './../utils/GenerateToken';
 import { adminSignupSchema, generateSixDigits } from './../schemas/signupAdminSchema';
 import { signupSchema } from './../schemas/signUpSchema';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Role } from '@prisma/client';
 import router, { Request, Response } from 'express';
 import bcrypt from "bcrypt";
 import { ApiResponse } from '../utils/ApiResponse';
 import { ApiError } from '../utils/ApiError';
+import { generateToken } from '../utils/GenerateToken';
 const prisma = new PrismaClient();
 
 type Admin = {
@@ -37,17 +39,30 @@ const createUser = async (req: Request, res: Response) => {
             data: {
                 email,
                 username,
-                password: hashedPassword
+                password: hashedPassword,
+                role: Role.USER
             }, select: {
+                id: true,
                 email: true,
                 username: true,
-                password: true
+                password: true,
+                role: true
             }
         });
 
-        res.status(201).json(
+        const Token = await generateToken(user);
+        const options = {
+            httpOnly: true,
+            secure: true
+        }
+        res.status(201)
+            .cookie("accessToken", Token.accessToken, options)
+            .cookie("refreshToken", Token.refreshToken, options)
+            .json(
             new ApiResponse(
-                user,
+                {
+                    userData: user, Token 
+                },
                 "User created Successfully"
             )
         );
