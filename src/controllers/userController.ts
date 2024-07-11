@@ -1,17 +1,13 @@
+import { signupSchema } from './../schemas/signUpSchema';
 import { PrismaClient } from '@prisma/client';
 import router, { Request, Response } from 'express';
+import bcrypt from "bcrypt";
 const prisma = new PrismaClient();
-
-export interface User {
-    username: string;
-    password: string;
-    email: string;
-}
 
 const createUser = async (req: Request, res: Response) => {
     try {
         // @ts-ignore
-        const { username, password, email }: User = req.body as User;
+        const { username, password, email }: User = req.body as signupSchema;
 
         if (!username || !password || !email) {
             return res.status(400).json({
@@ -26,12 +22,12 @@ const createUser = async (req: Request, res: Response) => {
         })
 
         if(existingUser) return res.json({ message: "Already Logged in" })
-
-        const user: User = await prisma.user.create({
+        const hashedPassword = await bcrypt.hash(password, 10) as string;
+        const user = await prisma.user.create({
             data: {
                 email,
                 username,
-                password
+                password: hashedPassword
             }, select: {
                 email: true,
                 username: true,
@@ -50,6 +46,10 @@ const createUser = async (req: Request, res: Response) => {
         });
     }
 };
+
+// const createAdmin = async(req: Request, res: Response) => {
+
+// }
 
 export {
     createUser
