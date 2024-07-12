@@ -5,7 +5,7 @@ const router = Router();
 
 // router.route('/').post(createAdmin);
 router.route('/').post(createAdmin);
-router.route('/token').post(getAdminToken);
+router.route('/token').get(getAdminToken);
 router.route('/login').post(verifyUser, loginAdmin);
 
 

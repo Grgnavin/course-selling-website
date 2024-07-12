@@ -1,5 +1,5 @@
 import bcrypt  from 'bcrypt';
-import { PrismaClient, Role } from '@prisma/client';
+import { $Enums, PrismaClient, Role } from '@prisma/client';
 import { Request, Response } from 'express';
 import { ApiError } from '../utils/ApiError';
 import { ApiResponse } from '../utils/ApiResponse';
@@ -23,6 +23,15 @@ type LoginAdmin = {
     token: string;
 }
 
+interface admin {
+    id: number;
+    username: string;
+    email: string;
+    password: string;
+    role: $Enums.Role;
+    token: number;
+    createdAt: Date;
+}
 
 const createAdmin = async(req: Request, res: Response) => {
     const { username, password, email, token }: Admin = req.body;
@@ -70,11 +79,9 @@ const createAdmin = async(req: Request, res: Response) => {
         }
         return res.status(201)
                 .json(
-                    new ApiResponse(
-                        {
-                            data: admin
-                        },
-                        "Ädmin created sucessfully",
+                    new ApiResponse<admin>(
+                        admin,
+                        "Admin created sucessfully",
                         true
                     )
                 )
@@ -146,7 +153,8 @@ const loginAdmin = async(req: Request, res: Response) => {
                 createdAt: false
             }
         })
-
+        console.log(user);
+        
         const options = {
             httpOnly: true,
             secure: true

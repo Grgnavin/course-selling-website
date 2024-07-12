@@ -25,7 +25,7 @@ export const verifyUser = async(req: any, res: Response, next: NextFunction) => 
                 false
             );
         }
-
+        console.log(decoded);
         if (decoded?.role === "ADMIN") {
             const admin = await prisma.admin.findFirst({
                 where: {
