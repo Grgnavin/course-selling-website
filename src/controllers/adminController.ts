@@ -14,13 +14,13 @@ type Admin = {
     username: string;
     password: string;
     email: string;
-    token: string;
+    token: number;
 }
 
 type LoginAdmin = {
     email: string;
     password: string;
-    token: string;
+    token: number;
 }
 
 interface admin {
@@ -33,10 +33,18 @@ interface admin {
     createdAt: Date;
 }
 
+interface userResponse {
+    user: {
+        id: number;
+        username: string;
+        email: string;
+    } | null;
+}
+
 const createAdmin = async(req: Request, res: Response) => {
     const { username, password, email, token }: Admin = req.body;
 
-    if (!username.trim() || !password.trim() || !email.trim() || !token.trim()) {
+    if (!username.trim() || !password.trim() || !email.trim() || !token) {
         return res.status(402).json(
             new ApiError(
                 null,
@@ -49,7 +57,7 @@ const createAdmin = async(req: Request, res: Response) => {
     try {
         const existingAdmin = await prisma.admin.findFirst({
             where: {
-                token: parseInt(token),
+                token,
             }
         })
         if(existingAdmin){
@@ -65,7 +73,7 @@ const createAdmin = async(req: Request, res: Response) => {
                 username,
                 email,
                 password: hashedPassword,
-                token: parseInt(token)
+                token
             }
         })
         if (!admin) {
@@ -113,14 +121,14 @@ const loginAdmin = async(req: Request, res: Response) => {
     try {
         const admin = await prisma.admin.findFirst({
             where: {
-                token: parseInt(token)
+                token: token
             }
         })
         if (!admin) {
             return res.status(401).json(
                 new ApiError(
                     null,
-                    "Admin doesn't exits",
+                    "Admin doesn't exists",
                     false
                 )
             )
@@ -146,11 +154,6 @@ const loginAdmin = async(req: Request, res: Response) => {
                 id: true,
                 username: true,
                 email: true,
-                password: false,
-                role: false,
-                courses: false,
-                token: false,
-                createdAt: false
             }
         })
         console.log(user);
@@ -164,9 +167,9 @@ const loginAdmin = async(req: Request, res: Response) => {
                 .cookie("refreshToken", Token.accessToken, options)
                 .cookie("adminToken", Token.accessToken, options)
                 .json(
-                    new ApiResponse(
+                    new ApiResponse<{ user: typeof user }>(
                         {
-                            AdminData: user
+                            user
                         },
                         `Welcome back admin Mr.${user?.username}`,
                         true

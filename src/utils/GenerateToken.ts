@@ -3,15 +3,17 @@ import { Role } from "@prisma/client";
 
 interface TokenPayload{
     id: number,
-    role: Role
+    role: Role,
+    token?: number;
 }
 
-export type UserData = {
+export interface UserData {
     id: number,
     username: string,
     email: string,
     password: string,
-    role: Role
+    role: Role,
+    token?: number
 }
 
 const generateAccesstoken = (user:TokenPayload): string => {
@@ -29,7 +31,8 @@ const generateAdmintoken = (user:TokenPayload): string => {
 export async function generateToken(user: UserData) {
     const tokenPayload: TokenPayload = {
         id: user.id,
-        role: user.role
+        role: user.role,
+        ...(user.token && { token: user.token })
     };
 
     const accessToken = generateAccesstoken(tokenPayload);

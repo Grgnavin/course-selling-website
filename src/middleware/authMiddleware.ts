@@ -8,24 +8,25 @@ const prisma = new PrismaClient();
 export const verifyUser = async(req: any, res: Response, next: NextFunction) => {
     try {
         const token = req.cookies?.accessToken || req.headers['authorization']?.replace("Bearer ", "");
-
+        console.log(token);
         if (!token) {
-            throw new ApiError(
-                null,
-                "UnAuthorized Request",
-                false
-            )
+            return res.status(401).json(
+                new ApiError(
+                    null, 
+                    "Unauthorized Request", 
+                    false
+                ));
         }
 
-        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string);
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as { id: number, role: string, token?: number };
         if (!decoded || typeof decoded !== 'object' || !('role' in decoded)) {
-            throw new ApiError(
-                null,
-                "Invalid Token",
-                false
-            );
+            return res.status(401).json(
+                new ApiError(
+                    null, 
+                    "Invalid Token", 
+                    false
+                ));
         }
-        console.log(decoded);
         if (decoded?.role === "ADMIN") {
             const admin = await prisma.admin.findFirst({
                 where: {

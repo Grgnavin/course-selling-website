@@ -6,7 +6,7 @@ const router = Router();
 // router.route('/').post(createAdmin);
 router.route('/').post(createAdmin);
 router.route('/token').get(getAdminToken);
-router.route('/login').post(verifyUser, loginAdmin);
+router.route('/login').post(loginAdmin);
 
 
 export default router;

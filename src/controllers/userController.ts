@@ -12,9 +12,16 @@ const prisma = new PrismaClient();
 type LoginUser = {
     email: string;
     password: string;
-    token: string;
+    token: number;
 }
 
+interface userReponse {
+    userData: {
+        email: string;
+        id: number;
+        username: string;
+    } | null
+}
 
 const createUser = async (req: Request, res: Response) => {
     try {
@@ -102,7 +109,7 @@ const loginUser = async(req: Request, res: Response) => {
             return res.status(401).json(
                 new ApiError(
                     null,
-                    "Admin doesn't exits",
+                    "User doesn't exits",
                     false
                 )
             )
@@ -128,9 +135,6 @@ const loginUser = async(req: Request, res: Response) => {
                 id: true,
                 username: true,
                 email: true,
-                password: false,
-                role: false,
-                createdAt: false
             }
         })
 
@@ -142,7 +146,7 @@ const loginUser = async(req: Request, res: Response) => {
                 .cookie("accessToken", Token.accessToken, options)
                 .cookie("refreshToken", Token.accessToken, options)
                 .json(
-                    new ApiResponse(
+                    new ApiResponse<userReponse>(
                         {
                             userData: existingUser
                         },
