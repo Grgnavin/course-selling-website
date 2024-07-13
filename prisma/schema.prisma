@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://nabingrg.xdezo:U9NjV8YGIyrS@ep-billowing-shape-23791845.us-east-2.aws.neon.tech/test?sslmode=require"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -31,17 +31,17 @@ model Admin {
 }
 
 model Course{
-  id         Int @id @default(autoincrement())
-  title      String @db.VarChar(250)
-  content    String? @db.VarChar(500)
-  author     Admin @relation(fields: [ instructorId ], references: [ id ])
-  instructorId Int
-  price      Int 
+  id            Int @id @default(autoincrement())
+  title         String @db.VarChar(250)
+  description   String 
+  content       String @db.VarChar(5000)
+  author        Admin @relation(fields: [ instructorId ], references: [ id ])
+  instructorId  Int
+  price         Int 
 }
 
 enum Role {
   USER
   ADMIN
-  MAINTAINER
 }
 

@@ -15,9 +15,12 @@ app.use(cookieParser());
 
 
 import userRouter from "./router/userRouter";
-import adminRouter from "./router/AdminRouter"
+import adminRouter from "./router/AdminRouter";
+import courseRouter from "./router/courseRouter"
 
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/admin', adminRouter);
+app.use('/api/v1/courses', courseRouter);
+
 
 export { app };

@@ -110,27 +110,25 @@ const loginAdmin = async(req: Request, res: Response) => {
 
     if (!email || !password || !token) {
         return res.status(401).json(
-            new ApiError(
-                null,
-                "Credentials are required",
-                false
-            )
+            {
+                message: "Credentials are required"
+            }
         )
     }
 
     try {
         const admin = await prisma.admin.findFirst({
             where: {
-                token: token
+                token,
             }
         })
+        console.log(admin);
+        
         if (!admin) {
             return res.status(401).json(
-                new ApiError(
-                    null,
-                    "Admin doesn't exists",
-                    false
-                )
+                {
+                    message: "Admin doesn't exits"
+                }
             )
         }
         
@@ -138,11 +136,9 @@ const loginAdmin = async(req: Request, res: Response) => {
         
         if (!isPassValid) {
             return res.status(401).json(
-                new ApiError(
-                    null,
-                    "Invalid user password",
-                    false
-                )
+                {
+                    message: "Invalid user password"
+                }
             )
         }
         
@@ -156,7 +152,6 @@ const loginAdmin = async(req: Request, res: Response) => {
                 email: true,
             }
         })
-        console.log(user);
         
         const options = {
             httpOnly: true,
@@ -178,12 +173,10 @@ const loginAdmin = async(req: Request, res: Response) => {
     } catch (error) {
         console.log(error);
         return res.status(500).json(
-            new ApiError(
-                null,
-                "Internal server error",
-                false
+            {
+                message: "Internal server error"
+            }
             )
-        )
     }
 }
 const getAdminToken = async(req: Request, res: Response)=> {

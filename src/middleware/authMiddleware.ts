@@ -8,7 +8,6 @@ const prisma = new PrismaClient();
 export const verifyUser = async(req: any, res: Response, next: NextFunction) => {
     try {
         const token = req.cookies?.accessToken || req.headers['authorization']?.replace("Bearer ", "");
-        console.log(token);
         if (!token) {
             return res.status(401).json(
                 new ApiError(
