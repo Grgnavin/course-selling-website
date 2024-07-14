@@ -1,11 +1,12 @@
 import  jwt  from 'jsonwebtoken';
 import { NextFunction, Response } from "express"
 import { ApiError } from "../utils/ApiError";
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client/edge';
+import { CustomRequest } from '../schemas/CustomRequestSchema';
 const prisma = new PrismaClient();
 
 
-export const verifyUser = async(req: any, res: Response, next: NextFunction) => {
+export const verifyUser = async(req: CustomRequest, res: Response, next: NextFunction) => {
     try {
         const token = req.cookies?.accessToken || req.headers['authorization']?.replace("Bearer ", "");
         if (!token) {
@@ -18,6 +19,8 @@ export const verifyUser = async(req: any, res: Response, next: NextFunction) => 
         }
 
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as { id: number, role: string, token?: number };
+        console.log("Decoded token: ", decoded);
+        
         if (!decoded || typeof decoded !== 'object' || !('role' in decoded)) {
             return res.status(401).json(
                 new ApiError(
@@ -40,6 +43,7 @@ export const verifyUser = async(req: any, res: Response, next: NextFunction) => 
                 )
             }
             req.admin = admin;
+            console.log("ReqAdmin::", req.admin);
             next();
         }else if(decoded?.role === "USER"){
             const user = await prisma.user.findFirst({

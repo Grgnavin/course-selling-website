@@ -1,4 +1,4 @@
-import { $Enums } from '@prisma/client';
+import { $Enums } from '@prisma/client/edge';
 import { Request } from "express";
 export interface CustomRequest extends Request {
     user?: {

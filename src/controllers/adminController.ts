@@ -1,5 +1,5 @@
 import bcrypt  from 'bcrypt';
-import { $Enums, PrismaClient, Role } from '@prisma/client';
+import { $Enums, PrismaClient, Role } from '@prisma/client/edge';
 import { Request, Response } from 'express';
 import { ApiError } from '../utils/ApiError';
 import { ApiResponse } from '../utils/ApiResponse';
@@ -95,6 +95,7 @@ const createAdmin = async(req: Request, res: Response) => {
                 )
     } catch (error) {
         console.error(error);
+        prisma.$disconnect();
         res.status(500).json(
             new ApiError(
                 null, 
@@ -172,6 +173,7 @@ const loginAdmin = async(req: Request, res: Response) => {
                 )
     } catch (error) {
         console.log(error);
+        prisma.$disconnect();
         return res.status(500).json(
             {
                 message: "Internal server error"

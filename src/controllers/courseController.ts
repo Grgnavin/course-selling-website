@@ -67,11 +67,9 @@ const createCourses = async (req:CustomRequest, res: Response) => {
 const getCourses = async (req: CustomRequest, res: Response) => {
     if (!req.user || !req.admin) {
         return res.status(403).json(
-            new ApiError(
-                null,
-                "Unauthorized Request",
-                false
-            )
+            {
+                message: "Unauthorized request"
+            }
         )
     }
 
@@ -84,11 +82,9 @@ const getCourses = async (req: CustomRequest, res: Response) => {
             })
             if (!loggedInUser) {
                 return res.status(403).json(
-                    new ApiError(
-                        null,
-                        "User doesn't exits",
-                        false
-                    )
+                    {
+                        messsage: "User not found"
+                    }
                 )
             }
             const courses = await prisma.course.findMany({
@@ -117,11 +113,9 @@ const getCourses = async (req: CustomRequest, res: Response) => {
     } catch (error) {
         console.log(error);
         return res.status(500).json(
-            new ApiError(
-                null,
-                "Internal server error",
-                true
-            )
+            {
+                message: "Internal server error"
+            }
         )
     }
 
