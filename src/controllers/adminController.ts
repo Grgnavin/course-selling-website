@@ -1,5 +1,5 @@
 import bcrypt  from 'bcrypt';
-import { $Enums, PrismaClient, Role } from '@prisma/client/edge';
+import { $Enums, PrismaClient, Role } from '@prisma/client';
 import { Request, Response } from 'express';
 import { ApiError } from '../utils/ApiError';
 import { ApiResponse } from '../utils/ApiResponse';

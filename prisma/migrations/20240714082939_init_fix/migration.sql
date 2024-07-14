@@ -4,10 +4,10 @@ CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN');
 -- CreateTable
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "username" TEXT NOT NULL,
     "email" VARCHAR(100) NOT NULL,
-    "password" VARCHAR(25) NOT NULL,
+    "password" VARCHAR(255) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "role" "Role" NOT NULL DEFAULT 'USER',
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
@@ -16,10 +16,12 @@ CREATE TABLE "User" (
 -- CreateTable
 CREATE TABLE "Admin" (
     "id" SERIAL NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "username" TEXT NOT NULL,
     "email" VARCHAR(100) NOT NULL,
-    "password" VARCHAR(25) NOT NULL,
+    "password" VARCHAR(255) NOT NULL,
     "role" "Role" NOT NULL DEFAULT 'ADMIN',
+    "token" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Admin_pkey" PRIMARY KEY ("id")
 );
@@ -28,7 +30,8 @@ CREATE TABLE "Admin" (
 CREATE TABLE "Course" (
     "id" SERIAL NOT NULL,
     "title" VARCHAR(250) NOT NULL,
-    "content" VARCHAR(500),
+    "description" TEXT NOT NULL,
+    "content" VARCHAR(5000) NOT NULL,
     "instructorId" INTEGER NOT NULL,
     "price" INTEGER NOT NULL,
 

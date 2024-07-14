@@ -6,7 +6,7 @@ import bcrypt from "bcrypt";
 import { ApiResponse } from '../utils/ApiResponse';
 import { ApiError } from '../utils/ApiError';
 import { generateToken } from '../utils/GenerateToken';
-import { PrismaClient, Role } from '@prisma/client/edge'
+import { PrismaClient, Role } from '@prisma/client'
 const prisma = new PrismaClient();
 
 type LoginUser = {

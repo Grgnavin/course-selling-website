@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon dist/index.js",
-    "dev": "npx prisma generate --no-engine && next dev"
+    "dev": "npx prisma generate && tsc -b && node ./dist/index.js"
   },
   "keywords": [],
   "author": "",
