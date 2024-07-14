@@ -5,7 +5,6 @@ import { verifyUser } from "../middleware/authMiddleware";
 const router = Router();
 
 router.route('/').get(verifyUser ,getCourses);
-router.route('/').post(verifyUser ,createCourses);
-
+router.route('/createCourse').post(verifyUser ,createCourses);
 
 export default router;

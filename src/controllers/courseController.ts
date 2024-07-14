@@ -36,11 +36,9 @@ const createCourses = async (req:CustomRequest, res: Response) => {
 
         if (!createCourse) {
             return res.status(402).json(
-                new ApiError(
-                    null,
-                    "Invalid credentials",
-                    false
-                )
+                {
+                    message: "Can't create course"
+                }
             )
         }
 
@@ -54,18 +52,16 @@ const createCourses = async (req:CustomRequest, res: Response) => {
     } catch (error) {
         console.log(error);
         return res.status(500).json(
-            new ApiError(
-                null,
-                "Internal server error",
-                false
-            )
+            {
+                message: "Internal server error"
+            }
         )
     }
 
 }
 
 const getCourses = async (req: CustomRequest, res: Response) => {
-    if (!req.user || !req.admin) {
+    if (!req.user && !req.admin) {
         return res.status(403).json(
             {
                 message: "Unauthorized request"
@@ -74,8 +70,9 @@ const getCourses = async (req: CustomRequest, res: Response) => {
     }
 
     try {
+        let courses;
         if (req.user) {
-            const loggedInUser = await prisma.user.findFirst({
+            const loggedInUser = await prisma.user.findUnique({
                 where: {
                     email: req.user?.email
                 }
@@ -87,29 +84,44 @@ const getCourses = async (req: CustomRequest, res: Response) => {
                     }
                 )
             }
-            const courses = await prisma.course.findMany({
+            courses = await prisma.course.findMany({
                 select: {
                     title: true
                 }
             });
 
-            if (!courses || courses.length === 0) {
-                return res.status(200).json(
-                    new ApiResponse(
-                        null,
-                        "No courses to show at the moment",
-                        true
-                    )
+        }else if(req.admin) {
+            const loggedInAdmin = await prisma.admin.findFirst({
+                where: {
+                    token: req.admin?.token
+                }
+            })
+            if (!loggedInAdmin) {
+                return res.status(403).json(
+                    {
+                        messsage: "Admin not found"
+                    }
                 )
             }
-            return res.status(200).json(
-                new ApiResponse(
-                    courses,
-                    "No courses to show at the moment",
-                    true
-                )
-            )
+            courses = await prisma.course.findMany({
+                select: {
+                    title: true,
+                    description: true,
+                    content: true,
+                }
+            });
         }
+        
+        const responseMessage = courses && courses.length > 0 
+                            ? `Here are all the ${courses.length} courses`
+                            : "No courses to show at the moment"; 
+        return res.status(200).json(
+            new ApiResponse(
+                courses,
+                responseMessage,
+                true
+            )
+        )
     } catch (error) {
         console.log(error);
         return res.status(500).json(
@@ -118,7 +130,6 @@ const getCourses = async (req: CustomRequest, res: Response) => {
             }
         )
     }
-
 }
 
 

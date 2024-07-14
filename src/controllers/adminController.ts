@@ -123,7 +123,6 @@ const loginAdmin = async(req: Request, res: Response) => {
                 token,
             }
         })
-        console.log(admin);
         
         if (!admin) {
             return res.status(401).json(
@@ -158,6 +157,8 @@ const loginAdmin = async(req: Request, res: Response) => {
             httpOnly: true,
             secure: true
         }
+        console.log(Token.accessToken);
+        
         return res.status(200)
                 .cookie("accessToken", Token.accessToken, options)
                 .cookie("refreshToken", Token.accessToken, options)
