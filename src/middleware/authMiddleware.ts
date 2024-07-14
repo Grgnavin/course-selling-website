@@ -1,7 +1,7 @@
 import  jwt  from 'jsonwebtoken';
 import { NextFunction, Response } from "express"
 import { ApiError } from "../utils/ApiError";
-import { Prisma, PrismaClient } from '@prisma/client/edge';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { CustomRequest } from '../schemas/CustomRequestSchema';
 const prisma = new PrismaClient();
 
