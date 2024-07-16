@@ -35,16 +35,53 @@ model Admin {
 }
 
 model Course{
-  id            Int @id @default(autoincrement())
-  title         String @db.VarChar(250)
-  description   String 
-  content       String @db.VarChar(5000)
-  author        Admin @relation(fields: [ instructorId ], references: [ id ])
-  instructorId  Int
-  price         Int 
+  id                Int @id @default(autoincrement())
+  title             String @db.VarChar(250)
+  description       String 
+  content           String @db.VarChar(5000)
+  author            Admin @relation(fields: [ instructorId ], references: [ id ])
+  instructorId      Int
+  price             Int 
+  purchasedCourses  PurchasedCourse[]
+  payment           Payment[]
+}
+
+model PurchasedCourse{
+  id                Int @id @default(autoincrement())
+  Price             Int 
+  course            Course @relation(fields: [courseId], references: [id])
+  courseId          Int
+  purchaseMethod    PurchaseMethod @default(esewa)
+  status            Status @default(pending)
+  createdAt         DateTime @default(now())
+}
+
+model Payment{
+  id                  Int @id @default(autoincrement())
+  transactionId       Int 
+  courseId            Int
+  course              Course @relation(fields: [courseId], references: [id])
+  amount              Int
+  dataVerificationReq Json?
+  apiQueryFromUser    Json?
+  paymenGateway       PurchaseMethod @default(esewa)
+  status            Status @default(pending)
+  createdAt           DateTime @default(now())
 }
 
 enum Role {
   USER
   ADMIN
+}
+
+enum Status {
+  pending
+  failed
+  success
+  refunded
+}
+
+enum PurchaseMethod {
+  esewa
+  khalti
 }
