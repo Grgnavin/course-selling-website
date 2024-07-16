@@ -47,14 +47,14 @@ model Course{
 }
 
 model PurchasedCourse{
-  id                Int @id @default(autoincrement())
+  id                String @id @default(uuid())
   Price             Int 
   course            Course @relation(fields: [courseId], references: [id])
   courseId          Int
   purchaseMethod    PurchaseMethod @default(esewa)
   status            Status @default(pending)
   createdAt         DateTime @default(now())
-}
+} 
 
 model Payment{
   id                  Int @id @default(autoincrement())

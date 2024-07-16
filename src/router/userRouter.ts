@@ -5,7 +5,7 @@ import { Router } from "express";
 const router = Router();
 
 router.route('/').post(createUser);
-router.route('/login').post(verifyUser, loginUser);
+router.route('/login').post(loginUser);
 
 
 export default router;
