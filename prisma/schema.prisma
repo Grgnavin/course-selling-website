@@ -58,7 +58,7 @@ model PurchasedCourse{
 
 model Payment{
   id                  Int @id @default(autoincrement())
-  transactionId       Int 
+  transactionId       String 
   courseId            Int
   course              Course @relation(fields: [courseId], references: [id])
   amount              Int

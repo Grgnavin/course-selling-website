@@ -17,10 +17,13 @@ app.use(cookieParser());
 import userRouter from "./router/userRouter";
 import adminRouter from "./router/AdminRouter";
 import courseRouter from "./router/courseRouter"
+import paymentRouter from "./router/PaymentRouter"
 
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/admin', adminRouter);
 app.use('/api/v1/courses', courseRouter);
+app.use('/api/v1/payment', paymentRouter);
+
 
 
 export { app };
