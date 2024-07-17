@@ -73,27 +73,26 @@ interface DataType<T> {
     signature: T;
 }
 
-// interface CompletePayment {
-// Amount:	500
-// Tax Amount:	0
-// Total Amount:	50
-// Transaction UUID (Item Purchase ID):	1
-// Product Code:	EPAYTEST
-// Product Service Charge:	0
-// Product Delivery Charge:	0
-// Success URL:	http://localhost:8000/complete-payment
-// Failure URL:	https://developer.esewa.com.np/failure
-// signed Field Names:	total_amount,transaction_uuid,product_code
-// Signature:	s50XPpnSW25Q2R3TE6dAARNIHTv40RLn2oPk/mdD334=
-// Secret Key:
-// }
+export interface EsewaRedirectData {
+    Amount?: string;
+    Tax_Amount?: string;
+    Total_Amount?: string;
+    Transaction_UUID?: string;
+    Product_Code?: string;
+    Product_Service_Charge?: string;
+    Product_Delivery_Charge?: string;
+    Success_URL?: string;
+    Failure_URL?: string;
+    signed_Field_Names?: string;
+    Signature?: string;
+    Secret_Key?: string; // Note: It's generally not safe to pass secret keys through URLs or client-side code.
+}
 
 const completePayment =  async (req: Request, res: Response) => {
-    const data: any = req.query.data; // Data received from eSewa's redirect
-    const paymentInfo = await verifyEsewaPayment(data);
+    const data =  req.query.data as string; // Data received from eSewa's redirect
+    const paymentInfo = await verifyEsewaPayment(data as string);
     try {
         // Verify payment with eSewa
-
         // Find the purchased item using the transaction UUID
         const purchasedItemData = await prisma.purchasedCourse.findUnique(
             {
@@ -102,7 +101,8 @@ const completePayment =  async (req: Request, res: Response) => {
                 }
             }
         );
-
+        console.log("PurchasedItemData: ", purchasedItemData);
+        console.log("PaymentInfo: ", paymentInfo);
         if (!purchasedItemData) {
             return res.status(500).json({
                 success: false,
@@ -110,7 +110,7 @@ const completePayment =  async (req: Request, res: Response) => {
             });
         }
 
-      // Create a new payment record in the database
+        // Create a new payment record in the database
         const paymentData = await prisma.payment.create({
             data: {
                 id: paymentInfo.decodedData.transaction_code,
@@ -123,12 +123,13 @@ const completePayment =  async (req: Request, res: Response) => {
                 status: "success",
             }
         });
-
+        console.log("PaymentData :", paymentData);
+        
         // Update the purchased item status to 'completed'
         await prisma.purchasedCourse.update(
             {
                 where: {
-                    id: paymentInfo.response.transaction_uuid,
+                    id: paymentInfo.response.transaction_uuid
                 },
                 data: {
                     status: $Enums.Status.success
